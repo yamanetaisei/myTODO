@@ -13,7 +13,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var tableView: UITableView!
     
-    let TODO = ["牛乳を買う", "掃除をする", "アプリ開発の勉強をする"]
+    var TODO = ["牛乳を買う", "掃除をする", "アプリ開発の勉強をする"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,6 +41,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
         return true
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            TODO.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+    }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell :UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "TODOCell" , for: indexPath)
         cell.textLabel!.text = TODO[indexPath.row]

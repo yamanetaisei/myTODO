@@ -8,3 +8,7 @@
 
 import Foundation
 import RealmSwift
+
+class TODOModel: Object {
+    dynamic var TODO: String? = ""
+}

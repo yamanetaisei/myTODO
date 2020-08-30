@@ -13,14 +13,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
 
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var tableView: UITableView!
-
-    var TODOList: Results<TODOModel>!
+    
+    let realm = try! Realm()
+    var todoList = [TODOModel]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let realm = try! Realm()
-        TODOList = realm.objects(TODOModel.self)
+        todoList = realm.objects(TODOModel.self).map( {$0} )
         
         textField.placeholder = "TODOを入力してください"
         textField.clearButtonMode = .always
@@ -28,13 +29,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
         
         tableView.delegate = self
         tableView.dataSource = self
-        
-        tableView.reloadData()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tableView.reloadData()
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -47,44 +41,36 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return TODOList.count
+        return todoList.count
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-    
-//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete {
-//            deleteTODO(at: indexPath.row)
-//            tableView.reloadData()
-//        }
-//    }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell :UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "TODOCell" , for: indexPath)
-        let item = TODOList[indexPath.row]
-        cell.textLabel!.text = item.TODO
+        cell.textLabel?.text = todoList[indexPath.row].todo
         return cell
     }
     
-//    func deleteTODO(at index: Int){
-//        let realm = try! Realm()
-//        try! realm.write {
-//            realm.delete(TODOList[index])
-//        }
-//
-//    }
     @IBAction func addButton(_ sender: Any) {
-        let model:TODOModel = TODOModel()
-        model.TODO = self.textField.text
-        
-        let realm = try! Realm()
-        
-        try! realm.write {
-            realm.add(model)
+        if let text = textField.text, !text.isEmpty {
+            realm.beginWrite()
+            
+            let newItem = TODOModel()
+            newItem.todo = text
+            realm.add(newItem)
+            try! realm.commitWrite()
+            
+            textField.text = ""
+            refresh()
         }
-        self.tableView.reloadData()
-        textField.text = ""
+    }
+    
+    func refresh() {
+        todoList = realm.objects(TODOModel.self).map({ $0 })
+        tableView.reloadData()
     }
 }
 

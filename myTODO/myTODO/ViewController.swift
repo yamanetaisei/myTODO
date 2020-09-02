@@ -17,6 +17,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
     let realm = try! Realm()
     var todoList = [TODOModel]()
     
+    var item = TODOModel?.self
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -65,6 +67,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
             
             textField.text = ""
             refresh()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            
+            let delItem = todoList[indexPath.row]
+            
+            realm.beginWrite()
+            realm.delete(delItem)
+            try! realm.commitWrite()
+            refresh()
+            
         }
     }
     
